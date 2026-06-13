@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Sign Language Detection</title>
+  <link rel="stylesheet" href="css/style.css"/>
+  <style>
+    .welcome-bg {
+      position: fixed; inset: 0; z-index: 0;
+      background:
+        radial-gradient(ellipse 800px 600px at 20% -10%, rgba(59,130,246,0.18), transparent 60%),
+        radial-gradient(ellipse 600px 500px at 85% 100%, rgba(99,102,241,0.15), transparent 60%),
+        var(--bg);
+    }
+    .welcome-wrap {
+      position: relative; z-index: 1;
+      min-height: 100svh;
+      display: flex; flex-direction: column;
+      max-width: 440px; margin: 0 auto;
+      padding: 0 20px;
+    }
+    .logo-section {
+      flex: 1;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 16px; padding: 60px 0 40px;
+    }
+    .logo-ring {
+      position: relative;
+      width: 96px; height: 96px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .logo-ring::before {
+      content: '';
+      position: absolute; inset: 0;
+      border-radius: 50%;
+      background: conic-gradient(from 0deg, var(--accent), transparent 60%);
+      animation: spin 4s linear infinite;
+    }
+    .logo-inner {
+      position: relative; z-index: 1;
+      width: 80px; height: 80px;
+      background: var(--bg2);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 36px;
+    }
+    .logo-title {
+      font-family: var(--font-display);
+      font-size: 28px; font-weight: 800;
+      text-align: center; letter-spacing: -0.5px;
+    }
+    .logo-sub {
+      color: var(--muted);
+      font-size: 15px;
+      text-align: center;
+      line-height: 1.5;
+      max-width: 280px;
+    }
+
+    /* Auth forms */
+    .auth-section { padding-bottom: 40px; }
+    .auth-tabs {
+      display: flex;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 4px; gap: 4px;
+      margin-bottom: 24px;
+    }
+    .auth-tab {
+      flex: 1; padding: 10px;
+      border-radius: 8px;
+      font-size: 14px; font-weight: 600;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all .2s;
+      text-align: center;
+    }
+    .auth-tab.active {
+      background: var(--accent);
+      color: #fff;
+    }
+    .auth-form { display: flex; flex-direction: column; gap: 14px; }
+    .auth-form.hidden { display: none; }
+
+    .form-error {
+      padding: 10px 14px;
+      background: var(--red-glow);
+      border: 1px solid rgba(239,68,68,0.3);
+      border-radius: var(--radius-xs);
+      color: var(--red);
+      font-size: 13px;
+      display: none;
+    }
+    .form-error.show { display: block; }
+
+    .features {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px; margin: 24px 0;
+    }
+    .feature-item {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 14px 12px;
+      display: flex; flex-direction: column; gap: 6px;
+    }
+    .feature-icon { font-size: 22px; }
+    .feature-label { font-size: 12px; font-weight: 600; color: var(--muted); }
+  </style>
+</head>
+<body>
+<div class="welcome-bg"></div>
+<div class="welcome-wrap">
+  <div class="logo-section fade-up">
+    <div class="logo-ring">
+      <div class="logo-inner">🤟</div>
+    </div>
+    <div>
+      <div class="logo-title">DeafHelper</div>
+      <div class="logo-sub">Real-time ISL sign detection powered by AI</div>
+    </div>
+    <div class="features">
+      <div class="feature-item fade-up fade-up-1">
+        <div class="feature-icon">👁️</div>
+        <div class="feature-label">Live Detection</div>
+      </div>
+      <div class="feature-item fade-up fade-up-2">
+        <div class="feature-icon">💬</div>
+        <div class="feature-label">Sentence Builder</div>
+      </div>
+      <div class="feature-item fade-up fade-up-3">
+        <div class="feature-icon">🔊</div>
+        <div class="feature-label">Text to Speech</div>
+      </div>
+      <div class="feature-item fade-up fade-up-4">
+        <div class="feature-icon">📋</div>
+        <div class="feature-label">History Log</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="auth-section fade-up fade-up-3">
+    <div class="auth-tabs">
+      <div class="auth-tab active" onclick="switchTab('login')">Sign In</div>
+      <div class="auth-tab" onclick="switchTab('signup')">Sign Up</div>
+    </div>
+
+    <!-- Login Form -->
+    <form class="auth-form" id="loginForm" onsubmit="handleLogin(event)">
+      <div class="form-error" id="loginError"></div>
+      <div class="input-wrap">
+        <label class="input-label">Email</label>
+        <input class="input" type="email" id="loginEmail" placeholder="you@email.com" required/>
+      </div>
+      <div class="input-wrap">
+        <label class="input-label">Password</label>
+        <input class="input" type="password" id="loginPassword" placeholder="••••••••" required/>
+      </div>
+      <button class="btn btn-primary btn-full" type="submit" id="loginBtn">
+        Sign In
+      </button>
+    </form>
+
+    <!-- Signup Form -->
+    <form class="auth-form hidden" id="signupForm" onsubmit="handleSignup(event)">
+      <div class="form-error" id="signupError"></div>
+      <div class="input-wrap">
+        <label class="input-label">Full Name</label>
+        <input class="input" type="text" id="signupName" placeholder="Your name" required/>
+      </div>
+      <div class="input-wrap">
+        <label class="input-label">Email</label>
+        <input class="input" type="email" id="signupEmail" placeholder="you@email.com" required/>
+      </div>
+      <div class="input-wrap">
+        <label class="input-label">Password</label>
+        <input class="input" type="password" id="signupPassword" placeholder="Min 6 characters" required minlength="6"/>
+      </div>
+      <button class="btn btn-primary btn-full" type="submit" id="signupBtn">
+        Create Account
+      </button>
+    </form>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/app.js"></script>
+<script>
+  // Redirect if already logged in
+  (async () => {
+    const user = await Auth.getUser();
+    if (user) window.location.href = 'pages/home.html';
+  })();
+
+  function switchTab(tab) {
+    document.querySelectorAll('.auth-tab').forEach((t,i) => {
+      t.classList.toggle('active', (i===0 && tab==='login') || (i===1 && tab==='signup'));
+    });
+    document.getElementById('loginForm').classList.toggle('hidden', tab !== 'login');
+    document.getElementById('signupForm').classList.toggle('hidden', tab !== 'signup');
+  }
+
+  async function handleLogin(e) {
+    e.preventDefault();
+    const btn = document.getElementById('loginBtn');
+    const err = document.getElementById('loginError');
+    btn.innerHTML = '<span class="spinner"></span>';
+    btn.disabled = true;
+    err.classList.remove('show');
+    try {
+      await Auth.signIn(
+        document.getElementById('loginEmail').value,
+        document.getElementById('loginPassword').value
+      );
+      window.location.href = 'pages/home.html';
+    } catch (ex) {
+      err.textContent = ex.message || 'Login failed. Please try again.';
+      err.classList.add('show');
+      btn.innerHTML = 'Sign In';
+      btn.disabled = false;
+    }
+  }
+
+  async function handleSignup(e) {
+    e.preventDefault();
+    const btn = document.getElementById('signupBtn');
+    const err = document.getElementById('signupError');
+    btn.innerHTML = '<span class="spinner"></span>';
+    btn.disabled = true;
+    err.classList.remove('show');
+    try {
+      await Auth.signUp(
+        document.getElementById('signupEmail').value,
+        document.getElementById('signupPassword').value,
+        document.getElementById('signupName').value
+      );
+      showToast('Account created! Check your email to verify.');
+      switchTab('login');
+      btn.innerHTML = 'Create Account';
+      btn.disabled = false;
+    } catch (ex) {
+      err.textContent = ex.message || 'Signup failed. Please try again.';
+      err.classList.add('show');
+      btn.innerHTML = 'Create Account';
+      btn.disabled = false;
+    }
+  }
+</script>
+</body>
+</html>

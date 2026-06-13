@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>History — SignSense</title>
+  <link rel="stylesheet" href="../css/style.css"/>
+  <style>
+    .history-item {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 14px 16px;
+      display: flex; align-items: center; gap: 12px;
+      animation: fadeUp .3s ease both;
+    }
+    .history-item:hover { border-color: var(--border-hover); }
+
+    .hi-left { flex: 1; min-width: 0; }
+    .hi-sentence {
+      font-size: 15px; font-weight: 500;
+      white-space: nowrap; overflow: hidden;
+      text-overflow: ellipsis;
+      margin-bottom: 4px;
+    }
+    .hi-time { font-size: 12px; color: var(--muted2); }
+    .hi-actions { display: flex; gap: 6px; flex-shrink: 0; }
+
+    .hi-btn {
+      width: 34px; height: 34px;
+      display: flex; align-items: center; justify-content: center;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xs);
+      color: var(--muted);
+      cursor: pointer;
+      transition: all .2s;
+    }
+    .hi-btn:hover { background: var(--card-hover); color: var(--text); }
+    .hi-btn.del:hover { border-color: rgba(239,68,68,0.4); color: var(--red); }
+    .hi-btn svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--muted);
+    }
+    .empty-state .icon { font-size: 48px; margin-bottom: 12px; }
+    .empty-state p { font-size: 14px; }
+
+    .filter-row {
+      display: flex; gap: 8px; margin-bottom: 16px;
+      overflow-x: auto; padding-bottom: 4px;
+    }
+    .filter-chip {
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 13px; font-weight: 500;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      cursor: pointer; flex-shrink: 0;
+      transition: all .2s;
+      background: transparent;
+    }
+    .filter-chip.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+
+    .list { display: flex; flex-direction: column; gap: 8px; }
+
+    .clear-all {
+      display: flex; justify-content: flex-end; margin-bottom: 12px;
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+  <main class="content">
+    <div class="page-header fade-up">
+      <a href="home.html" class="back-btn">
+        <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+      </a>
+      <h1>History</h1>
+      <span id="countBadge" class="badge badge-blue" style="display:none;"></span>
+    </div>
+
+    <div class="filter-row fade-up fade-up-1">
+      <button class="filter-chip active" onclick="setFilter('all', this)">All</button>
+      <button class="filter-chip" onclick="setFilter('today', this)">Today</button>
+      <button class="filter-chip" onclick="setFilter('week', this)">This Week</button>
+    </div>
+
+    <div class="clear-all fade-up fade-up-1" id="clearAllWrap" style="display:none;">
+      <button class="btn btn-danger" style="padding:8px 16px; font-size:13px;" onclick="clearAll()">
+        Clear All
+      </button>
+    </div>
+
+    <div class="list fade-up fade-up-2" id="historyList">
+      <div class="empty-state">
+        <div class="icon">🕐</div>
+        <p>Loading history...</p>
+      </div>
+    </div>
+  </main>
+
+  <nav class="bottom-nav">
+    <div class="nav-item" onclick="location.href='home.html'">
+      <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span>Home</span>
+    </div>
+    <div class="nav-item" onclick="location.href='detection.html'">
+      <svg viewBox="0 0 24 24"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+      <span>Detect</span>
+    </div>
+    <div class="nav-item active" onclick="location.href='history.html'">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      <span>History</span>
+    </div>
+    <div class="nav-item" onclick="location.href='settings.html'">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      <span>Settings</span>
+    </div>
+  </nav>
+</div>
+<div id="toast"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../js/app.js"></script>
+<script>
+let allHistory = [];
+let currentFilter = 'all';
+let currentUser = null;
+
+(async () => {
+  currentUser = await Auth.requireAuth();
+  if (!currentUser) return;
+  await loadHistory();
+})();
+
+async function loadHistory() {
+  try {
+    allHistory = await History.getAll(currentUser.id);
+    renderHistory();
+  } catch(e) {
+    document.getElementById('historyList').innerHTML = `
+      <div class="empty-state"><div class="icon">❌</div><p>Failed to load history</p></div>`;
+  }
+}
+
+function setFilter(f, el) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  renderHistory();
+}
+
+function filterItems() {
+  const now = new Date();
+  return allHistory.filter(h => {
+    const d = new Date(h.created_at);
+    if (currentFilter === 'today') return d.toDateString() === now.toDateString();
+    if (currentFilter === 'week') return (now - d) < 7 * 86400000;
+    return true;
+  });
+}
+
+function renderHistory() {
+  const items = filterItems();
+  const list = document.getElementById('historyList');
+  const badge = document.getElementById('countBadge');
+  const clearWrap = document.getElementById('clearAllWrap');
+
+  if (items.length === 0) {
+    list.innerHTML = `<div class="empty-state"><div class="icon">🕐</div><p>No detections found</p></div>`;
+    badge.style.display = 'none';
+    clearWrap.style.display = 'none';
+    return;
+  }
+
+  badge.textContent = items.length;
+  badge.style.display = 'inline-flex';
+  clearWrap.style.display = 'flex';
+
+  list.innerHTML = items.map((h, i) => `
+    <div class="history-item" style="animation-delay:${i * 0.04}s">
+      <div class="hi-left">
+        <div class="hi-sentence">${h.sentence}</div>
+        <div class="hi-time">${formatDate(h.created_at)}</div>
+      </div>
+      <div class="hi-actions">
+        <button class="hi-btn" onclick="speakItem('${h.sentence.replace(/'/g,"\\'")}')">
+          <svg viewBox="0 0 24 24"><path d="M11 5 6 9H3v6h3l5 4V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/></svg>
+        </button>
+        <button class="hi-btn" onclick="copyItem('${h.sentence.replace(/'/g,"\\'")}')">
+          <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        </button>
+        <button class="hi-btn del" onclick="deleteItem('${h.id}', this)">
+          <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg>
+        </button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function formatDate(iso) {
+  const d = new Date(iso);
+  const today = new Date();
+  if (d.toDateString() === today.toDateString()) return 'Today ' + d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+  return d.toLocaleDateString([], {month:'short', day:'numeric'}) + ' ' + d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+}
+
+function speakItem(text) { speak(text); }
+function copyItem(text) { navigator.clipboard.writeText(text); showToast('Copied!'); }
+
+async function deleteItem(id, btn) {
+  btn.closest('.history-item').style.opacity = '0.4';
+  try {
+    await History.delete(id);
+    allHistory = allHistory.filter(h => h.id !== id);
+    renderHistory();
+    showToast('Deleted');
+  } catch(e) {
+    showToast('Delete failed');
+    btn.closest('.history-item').style.opacity = '1';
+  }
+}
+
+async function clearAll() {
+  if (!confirm('Delete all history?')) return;
+  try {
+    await History.clearAll(currentUser.id);
+    allHistory = [];
+    renderHistory();
+    showToast('History cleared');
+  } catch(e) {
+    showToast('Failed to clear');
+  }
+}
+</script>
+</body>
+</html>

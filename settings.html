@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Settings — SignSense</title>
+  <link rel="stylesheet" href="../css/style.css"/>
+  <style>
+    .settings-section { margin-bottom: 24px; }
+    .section-header {
+      font-size: 11px; font-weight: 700;
+      color: var(--muted2);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+      padding: 0 4px;
+    }
+    .settings-group {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .setting-row {
+      display: flex; align-items: center; gap: 14px;
+      padding: 16px;
+      border-bottom: 1px solid var(--border);
+      transition: background .15s;
+    }
+    .setting-row:last-child { border-bottom: none; }
+    .setting-row:hover { background: var(--card-hover); }
+    .setting-icon {
+      width: 36px; height: 36px;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; flex-shrink: 0;
+    }
+    .si-blue { background: rgba(59,130,246,0.15); }
+    .si-green { background: rgba(34,197,94,0.15); }
+    .si-amber { background: rgba(245,158,11,0.15); }
+    .si-red { background: rgba(239,68,68,0.15); }
+    .si-purple { background: rgba(168,85,247,0.15); }
+
+    .setting-text { flex: 1; }
+    .setting-label { font-size: 15px; font-weight: 500; }
+    .setting-sub { font-size: 12px; color: var(--muted); margin-top: 1px; }
+
+    .setting-select {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xs);
+      color: var(--text);
+      font-size: 13px;
+      padding: 6px 10px;
+      font-family: var(--font-body);
+      cursor: pointer;
+    }
+
+    .slider-wrap { display: flex; align-items: center; gap: 10px; }
+    .slider-val { font-size: 13px; color: var(--muted2); min-width: 28px; text-align: right; }
+    input[type=range] {
+      width: 100px;
+      accent-color: var(--accent);
+    }
+
+    .profile-card {
+      background: linear-gradient(135deg, rgba(59,130,246,0.1), rgba(99,102,241,0.08));
+      border: 1px solid rgba(59,130,246,0.2);
+      border-radius: var(--radius);
+      padding: 20px;
+      display: flex; align-items: center; gap: 14px;
+      margin-bottom: 20px;
+    }
+    .avatar {
+      width: 52px; height: 52px;
+      border-radius: 50%;
+      background: var(--accent);
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-display);
+      font-size: 20px; font-weight: 700;
+      color: #fff; flex-shrink: 0;
+    }
+    .profile-name { font-weight: 600; font-size: 16px; }
+    .profile-email { font-size: 13px; color: var(--muted); }
+
+    .version-tag {
+      text-align: center;
+      font-size: 12px;
+      color: var(--muted2);
+      padding: 8px;
+      margin-top: 8px;
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+  <main class="content">
+    <div class="page-header fade-up">
+      <a href="home.html" class="back-btn">
+        <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+      </a>
+      <h1>Settings</h1>
+    </div>
+
+    <!-- Profile -->
+    <div class="profile-card fade-up fade-up-1">
+      <div class="avatar" id="avatarEl">?</div>
+      <div>
+        <div class="profile-name" id="profileName">Loading...</div>
+        <div class="profile-email" id="profileEmail"></div>
+      </div>
+    </div>
+
+    <!-- Voice -->
+    <div class="settings-section fade-up fade-up-2">
+      <div class="section-header">Voice & Speech</div>
+      <div class="settings-group">
+        <div class="setting-row">
+          <div class="setting-icon si-blue">🔊</div>
+          <div class="setting-text">
+            <div class="setting-label">Voice Output</div>
+            <div class="setting-sub">Speak detected signs aloud</div>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" id="voiceToggle" onchange="saveSetting('voiceOutput', this.checked)"/>
+            <div class="toggle-track"></div>
+          </label>
+        </div>
+        <div class="setting-row">
+          <div class="setting-icon si-green">🎚️</div>
+          <div class="setting-text">
+            <div class="setting-label">Speech Rate</div>
+            <div class="setting-sub">How fast the voice speaks</div>
+          </div>
+          <div class="slider-wrap">
+            <input type="range" min="0.5" max="2" step="0.1" id="rateSlider"
+              oninput="document.getElementById('rateVal').textContent=parseFloat(this.value).toFixed(1); saveSetting('voiceRate', parseFloat(this.value))"/>
+            <span class="slider-val" id="rateVal">1.0</span>
+          </div>
+        </div>
+        <div class="setting-row">
+          <div class="setting-icon si-amber">🎵</div>
+          <div class="setting-text">
+            <div class="setting-label">Language</div>
+            <div class="setting-sub">Voice language</div>
+          </div>
+          <select class="setting-select" id="langSelect" onchange="saveSetting('language', this.value)">
+            <option value="en-US">English (US)</option>
+            <option value="en-IN">English (India)</option>
+            <option value="hi-IN">Hindi</option>
+            <option value="mr-IN">Marathi</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Detection -->
+    <div class="settings-section fade-up fade-up-3">
+      <div class="section-header">Detection</div>
+      <div class="settings-group">
+        <div class="setting-row">
+          <div class="setting-icon si-purple">🎯</div>
+          <div class="setting-text">
+            <div class="setting-label">Confidence Threshold</div>
+            <div class="setting-sub">Minimum confidence to accept a sign</div>
+          </div>
+          <div class="slider-wrap">
+            <input type="range" min="0.5" max="0.95" step="0.05" id="confSlider"
+              oninput="document.getElementById('confVal').textContent=Math.round(this.value*100)+'%'; saveSetting('confidence', parseFloat(this.value))"/>
+            <span class="slider-val" id="confVal">70%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- About -->
+    <div class="settings-section fade-up fade-up-4">
+      <div class="section-header">App</div>
+      <div class="settings-group">
+        <div class="setting-row">
+          <div class="setting-icon si-blue">ℹ️</div>
+          <div class="setting-text">
+            <div class="setting-label">About SignSense</div>
+            <div class="setting-sub">AI-powered ISL detection</div>
+          </div>
+        </div>
+        <div class="setting-row" style="cursor:pointer;" onclick="handleSignOut()">
+          <div class="setting-icon si-red">🚪</div>
+          <div class="setting-text">
+            <div class="setting-label" style="color:var(--red);">Sign Out</div>
+            <div class="setting-sub">Log out of your account</div>
+          </div>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--muted2)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
+      </div>
+    </div>
+
+    <div class="version-tag">SignSense v1.0 — No installation required</div>
+  </main>
+
+  <nav class="bottom-nav">
+    <div class="nav-item" onclick="location.href='home.html'">
+      <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span>Home</span>
+    </div>
+    <div class="nav-item" onclick="location.href='detection.html'">
+      <svg viewBox="0 0 24 24"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+      <span>Detect</span>
+    </div>
+    <div class="nav-item" onclick="location.href='history.html'">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      <span>History</span>
+    </div>
+    <div class="nav-item active" onclick="location.href='settings.html'">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      <span>Settings</span>
+    </div>
+  </nav>
+</div>
+<div id="toast"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../js/app.js"></script>
+<script>
+(async () => {
+  const user = await Auth.requireAuth();
+  if (!user) return;
+
+  const name = user.user_metadata?.full_name || user.email.split('@')[0];
+  document.getElementById('profileName').textContent = name;
+  document.getElementById('profileEmail').textContent = user.email;
+  document.getElementById('avatarEl').textContent = name.charAt(0).toUpperCase();
+
+  // Load settings
+  const s = Settings.get();
+  document.getElementById('voiceToggle').checked = s.voiceOutput;
+  document.getElementById('rateSlider').value = s.voiceRate;
+  document.getElementById('rateVal').textContent = parseFloat(s.voiceRate).toFixed(1);
+  document.getElementById('langSelect').value = s.language;
+  document.getElementById('confSlider').value = s.confidence;
+  document.getElementById('confVal').textContent = Math.round(s.confidence * 100) + '%';
+})();
+
+function saveSetting(key, value) {
+  Settings.update(key, value);
+  showToast('Saved');
+}
+
+async function handleSignOut() {
+  if (!confirm('Sign out?')) return;
+  try {
+    await Auth.signOut();
+    window.location.href = '../index.html';
+  } catch(e) {
+    showToast('Sign out failed');
+  }
+}
+</script>
+</body>
+</html>
